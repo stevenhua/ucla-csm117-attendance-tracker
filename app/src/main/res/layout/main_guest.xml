@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="150px"
+        android:text="Check In!"
+        android:background="@drawable/ButtonGreen"
+        android:textColor="#FFFFFF"
+        android:textSize="16pt"
+        android:id="@+id/host"
+        android:layout_marginBottom="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:id="@+id/name"
+        android:layout_width="640px"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="77dp"
+        android:hint="Enter Name"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="640px"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/studentid"
+        android:hint="Enter 9-digit Student ID #"
+        android:layout_below="@+id/name"
+        android:layout_alignLeft="@+id/name"
+        android:layout_alignStart="@+id/name"
+        android:layout_marginTop="44dp" />
+
+</RelativeLayout>

@@ -10,15 +10,17 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Bluetooth Attendance"
+        android:textSize="30pt"
+        android:gravity="center"
         android:id="@+id/textView"
-        android:layout_marginTop="45dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="150px"
-        android:text="Set up Host"
+        android:text="Host"
         android:background="@drawable/ButtonBlue"
         android:textColor="#FFFFFF"
         android:textSize="16pt"
@@ -29,8 +31,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="150px"
-        android:text="Find Host"
-        android:background="@drawable/ButtonBlue"
+        android:text="Guest"
+        android:background="@drawable/ButtonGreen"
         android:textColor="#FFFFFF"
         android:textSize="16pt"
         android:id="@+id/guest"
