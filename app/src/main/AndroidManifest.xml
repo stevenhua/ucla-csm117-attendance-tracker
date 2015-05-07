@@ -34,7 +34,7 @@
             android:label="@string/app_name" >
         </activity>
 
-        <!-- HOST ACTIVITY: USE TO HANDLE GUEST FUNCTIONS -->
+        <!-- HOST ACTIVITY: USE TO HANDLE HOST FUNCTIONS -->
         <activity
             android:name=".HostActivity"
             android:screenOrientation="portrait">
