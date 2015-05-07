@@ -18,21 +18,30 @@
         android:layout_alignParentStart="true" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="150px"
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:padding="10dp"
         android:text="Host"
-        android:background="@drawable/ButtonBlue"
+        android:background="@android:color/background_dark"
         android:textColor="#FFFFFF"
         android:textSize="16pt"
         android:id="@+id/host"
         android:layout_marginBottom="30dp"
-        android:layout_above="@+id/guest" />
+        android:layout_above="@+id/guest"
+        android:clickable="true"
+        android:enabled="true"
+        android:onClick="openHostActivity"
+        android:focusableInTouchMode="false" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="150px"
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:padding="10dp"
         android:text="Guest"
-        android:background="@drawable/ButtonGreen"
+        android:background="@android:color/background_dark"
+        android:clickable="true"
+        android:enabled="true"
+        android:onClick="openGuestActivity"
         android:textColor="#FFFFFF"
         android:textSize="16pt"
         android:id="@+id/guest"

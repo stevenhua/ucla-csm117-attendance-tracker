@@ -1,20 +1,19 @@
 package edu.ucla.csm117.bluetoothattendance;
 
-import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-
-public class MainActivity extends ActionBarActivity {
+/**
+ * Created by matthew on 5/6/15.
+ */
+public class HostActivity extends ActionBarActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_host);
     }
 
     @Override
@@ -37,15 +36,5 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void openHostActivity(View view) {
-        Intent intent = new Intent(this, HostActivity.class);
-        startActivity(intent);
-    }
-
-    public void openGuestActivity(View view) {
-        Intent intent = new Intent(this, GuestActivity.class);
-        startActivity(intent);
     }
 }

@@ -23,8 +23,24 @@
         <!-- MAIN ACTIVITY: USE TO CHOOSE BETWEEN HOST/CLIENT -->
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait">
             android:label="@string/app_name" >
         </activity>
+
+        <!-- GUEST ACTIVITY: USE TO HANDLE GUEST FUNCTIONS -->
+        <activity
+            android:name=".GuestActivity"
+            android:screenOrientation="portrait">
+            android:label="@string/app_name" >
+        </activity>
+
+        <!-- HOST ACTIVITY: USE TO HANDLE GUEST FUNCTIONS -->
+        <activity
+            android:name=".HostActivity"
+            android:screenOrientation="portrait">
+            android:label="@string/app_name" >
+        </activity>
+
     </application>
 
 </manifest>
