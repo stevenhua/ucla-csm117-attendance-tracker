@@ -10,10 +10,16 @@ import android.view.MenuItem;
  */
 public class HostActivity extends ActionBarActivity{
 
+    BluetoothManager btManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_host);
+
+        // request bluetooth as soon as host activity opens up
+        btManager = new BluetoothManager(this);
+
     }
 
     @Override

@@ -11,10 +11,15 @@ import android.view.MenuItem;
 
 public class GuestActivity extends ActionBarActivity {
 
+    BluetoothManager btManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_guest);
+
+        // request bluetooth as soon as guest activity opens up
+        btManager = new BluetoothManager(this);
     }
 
     @Override
