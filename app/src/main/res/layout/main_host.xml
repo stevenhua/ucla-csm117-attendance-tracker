@@ -20,6 +20,9 @@
     <Button
         android:layout_height="62dp"
         android:padding="10dp"
+        android:enabled="true"
+        android:onClick="onStartHosting"
+        android:clickable="true"
         android:text="Start Hosting!"
         android:textColor="#FFFFFF"
         android:textSize="16pt"
