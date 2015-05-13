@@ -8,7 +8,10 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.bluetooth.BluetoothDevice;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -76,6 +79,60 @@ public class BluetoothManager {
         }
     }
 
+    private class ConnectThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final BluetoothDevice mmDevice;
+
+        public ConnectThread(BluetoothDevice device) {
+            BluetoothSocket tmp = null;
+            mmDevice = device;
+
+            try {
+                tmp = mmDevice.createInsecureRfcommSocketToServiceRecord(SERVICE_UUID);
+            } catch (IOException e) {
+
+            }
+            mmSocket = tmp;
+
+
+        }
+
+
+        public void run() {
+            // Cancel discovery because it will slow down the connection
+            adapter.cancelDiscovery();
+
+            try {
+                // Connect the device through the socket. This will block
+                // until it succeeds or throws an exception
+                mmSocket.connect();
+            } catch (IOException connectException) {
+                // Unable to connect; close the socket and get out
+                try {
+                    mmSocket.close();
+                } catch (IOException closeException) {
+                }
+                return;
+            }
+
+            // Do work to manage the connection (in a separate thread)
+            // manageConnectedSocket(mmSocket);
+
+        }
+
+
+        /**
+         * Will cancel an in-progress connection, and close the socket
+         */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) {
+            }
+        }
+    }
+
+
     public BluetoothManager(Activity activity) {
         // upon construction, get the bluetooth device
 
@@ -101,6 +158,17 @@ public class BluetoothManager {
         }
 
         return true;
+    }
+
+    public boolean client(BluetoothDevice device){
+        ConnectThread connectionThread = new ConnectThread(device);
+        try {
+            connectionThread.start();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+
     }
 
     public boolean ready() {
