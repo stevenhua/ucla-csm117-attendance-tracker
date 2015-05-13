@@ -11,7 +11,8 @@
         android:layout_height="62dp"
         android:padding="10dp"
         android:text="Check In!"
-        android:background="@android:color/background_dark"
+        android:fontFamily="sans-serif-light"
+        android:background="@android:color/holo_blue_dark"
         android:textColor="#FFFFFF"
         android:textSize="16pt"
         android:id="@+id/host"
@@ -26,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="70dp"
         android:hint="Enter Name"
+        android:fontFamily="sans-serif-light"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
@@ -33,6 +35,7 @@
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:inputType="number"
+        android:fontFamily="sans-serif-light"
         android:ems="10"
         android:id="@+id/studentid"
         android:hint="Enter 9-digit Student ID #"
