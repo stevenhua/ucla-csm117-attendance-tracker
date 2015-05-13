@@ -22,10 +22,10 @@ public class BluetoothManager {
 
     BluetoothAdapter adapter;
     Activity activity;
-
     final String NAME = "BluetoothAttendance";
     final UUID SERVICE_UUID = UUID.fromString("D952EB9F-7AD2-4B1B-B3CE-386735205990");
 
+    boolean valid_socket=false;
     final int REQUEST_ENABLE_BT = 1;
 
     private class AcceptThread extends Thread {
@@ -90,11 +90,21 @@ public class BluetoothManager {
             try {
                 tmp = mmDevice.createInsecureRfcommSocketToServiceRecord(SERVICE_UUID);
             } catch (IOException e) {
-
+            //i think this means that the other device isnt broadcasting the same uuid
+                //or device no longer has bluetooth
             }
             mmSocket = tmp;
+            if(mmSocket!=null)
+                valid_socket=true;
+/*
 
+            try {
+                mmSocket.connect();
+            }catch (Exception e){
+                //connection failed, maybe incorrect uuid
 
+            }
+*/
         }
 
 

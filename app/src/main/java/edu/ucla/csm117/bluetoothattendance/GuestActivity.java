@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -15,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.content.BroadcastReceiver;
 import android.widget.Toast;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,9 +35,14 @@ import android.widget.ArrayAdapter;
  */
 
 public class GuestActivity extends ActionBarActivity {
-
     BluetoothManager btManager;
-    ArrayList<BluetoothDevice> device_list;
+    ArrayList<BluetoothDevice> device_list=new ArrayList<BluetoothDevice>();
+    ArrayList<String> listDevices = new ArrayList<String>();
+    boolean discovered=false;
+    public final String TAG="GuestActivity";
+    ArrayAdapter<String> BTadapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,21 +81,23 @@ public class GuestActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-//delete Toasts later
+
     private final BroadcastReceiver mReceiver=new BroadcastReceiver()
      {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             // When discovery finds a device
-            Toast.makeText(getApplicationContext(),"onRECEIVE",Toast.LENGTH_LONG).show();
+            //Log.d(TAG, "onReceive");
+            Toast.makeText(getApplicationContext(),"onReceive",Toast.LENGTH_LONG).show();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
-
-                Toast.makeText(getApplicationContext(),"ACTION FOUND",Toast.LENGTH_LONG).show();
-
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+              //  Log.d(TAG,"ACTION_FOUND");
+                //Toast.makeText(getApplicationContext(),"action_found",Toast.LENGTH_LONG).show();
+               BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 device_list.add(device);
+                BTadapter.add(device.getName() + "\n" + device.getAddress());
+                BTadapter.notifyDataSetChanged();
 
 
                 // Add the name and address to an array adapter to show in a ListView
@@ -96,10 +105,13 @@ public class GuestActivity extends ActionBarActivity {
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
             {
-                Toast.makeText(getApplicationContext(),"DISCOVERY STARTED",Toast.LENGTH_LONG).show();
+               Toast.makeText(getApplicationContext(),"discovery start",Toast.LENGTH_LONG).show();
+              //  Log.d(TAG, "DISCOVERY_STARTED");
             }
             else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
+                Toast.makeText(getApplicationContext(),"discovery finished",Toast.LENGTH_LONG).show();
+                //Log.d(TAG, "DISCOVERY FINISHED");
                 process_devices();
             }
 
@@ -108,10 +120,23 @@ public class GuestActivity extends ActionBarActivity {
     };
 
     public void process_devices(){
+        if(discovered==false)
+        {
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("Failure to start Discovering");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+        }
+
         boolean check=false;
             for (int i = 0; i < device_list.size(); i++) {
-                check = btManager.client(device_list.get(i));
-
+                btManager.client(device_list.get(i));
+                check=btManager.valid_socket;
                 if (check == true) {
                     //we connected to a host, we can now send data
                     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
@@ -144,14 +169,25 @@ public class GuestActivity extends ActionBarActivity {
 
 
 
-    public boolean findHost(View view) {
-        boolean ret=false;
+    public void findHost(View view) {
 
         final String name = ((EditText)(findViewById(R.id.name))).getText().toString();
         //final String studentid=((EditText)(findViewById(R.id.name))).getText().toString();
         //&&studentid.length()==9
         if (!name.equals("") && btManager.ready()) {
-            setContentView(R.layout.guest_search);
+         if(true)
+         {
+
+             setContentView(R.layout.guest_search);
+             BTadapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                     listDevices);
+
+             final ListView listView = (ListView) findViewById(R.id.devices_discovered);
+             listView.setAdapter(BTadapter);
+
+             listDevices.add("Waiting for attendees....");
+             BTadapter.notifyDataSetChanged();
+
 
             IntentFilter filter = new IntentFilter();
             filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -164,40 +200,53 @@ public class GuestActivity extends ActionBarActivity {
                 //already discovering
                 btManager.adapter.cancelDiscovery();
             }
-              ret= btManager.adapter.startDiscovery();
+
+
+                try {
+                   discovered= btManager.adapter.startDiscovery();
+                } catch(Exception e)
+                {
+
+                    AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                    alertDialog.setTitle("Error");
+                    alertDialog.setMessage("error discovering");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                }
+
 
         }
-        else
-        {
-            if(name.equals(""))
-            {
-                AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                alertDialog.setTitle("Error");
-                alertDialog.setMessage("Name cannot be empty. Please input a valid name");
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
-            }
-           /* else if(studentid.length()!=9)
-            {
-                AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                alertDialog.setTitle("Error");
-                alertDialog.setMessage("Student id must be 9 digits. Please input a valid student id");
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
+        else {
+             if (name.equals("")) {
+                 AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                 alertDialog.setTitle("Error");
+                 alertDialog.setMessage("Name cannot be empty. Please input a valid name");
+                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                         new DialogInterface.OnClickListener() {
+                             public void onClick(DialogInterface dialog, int which) {
+                                 dialog.dismiss();
+                             }
+                         });
+                 alertDialog.show();
+             } /*else if (studentid.length() != 9) {
+
+                 AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                 alertDialog.setTitle("Error");
+                 alertDialog.setMessage("Student id must be 9 digits. Please input a valid student id");
+                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                         new DialogInterface.OnClickListener() {
+                             public void onClick(DialogInterface dialog, int which) {
+                                 dialog.dismiss();
+                             }
+                         });
+
+             }*/
 
             }
-                */
-
         }
-    return ret;
     }
 }
