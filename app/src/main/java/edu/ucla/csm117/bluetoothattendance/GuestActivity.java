@@ -15,14 +15,11 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.content.BroadcastReceiver;
-import android.widget.Toast;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
-//import android.content.Context;
-//import java.lang.String;
+
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -41,7 +38,9 @@ public class GuestActivity extends ActionBarActivity {
     boolean discovered=false;
     public final String TAG="GuestActivity";
     ArrayAdapter<String> BTadapter;
-
+    IntentFilter filter;
+    boolean finished=false;
+   // long start_discovering;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,36 +87,37 @@ public class GuestActivity extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             // When discovery finds a device
-            //Log.d(TAG, "onReceive");
-            Toast.makeText(getApplicationContext(),"onReceive",Toast.LENGTH_LONG).show();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
-              //  Log.d(TAG,"ACTION_FOUND");
-                //Toast.makeText(getApplicationContext(),"action_found",Toast.LENGTH_LONG).show();
                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                device_list.add(device);
-                BTadapter.add(device.getName() + "\n" + device.getAddress());
-                BTadapter.notifyDataSetChanged();
+                if(device_list.contains(device)==false) {
+                    device_list.add(device);
+
+                    // Add the name and address to an array adapter to show in a ListView
+                    //mainly used for testing, can remove later
+                    BTadapter.add(device.getName() + "\n" + device.getAddress());
+                    BTadapter.notifyDataSetChanged();
+                }
 
 
-                // Add the name and address to an array adapter to show in a ListView
-                // adapter.add(device.getName() + "\n" + device.getAddress());
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
             {
-               Toast.makeText(getApplicationContext(),"discovery start",Toast.LENGTH_LONG).show();
-              //  Log.d(TAG, "DISCOVERY_STARTED");
+
+
             }
-            else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
+            else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action) && finished==false)
             {
-                Toast.makeText(getApplicationContext(),"discovery finished",Toast.LENGTH_LONG).show();
-                //Log.d(TAG, "DISCOVERY FINISHED");
+                finished=true;
+
                 process_devices();
             }
 
 
         }
     };
+
+
 
     public void process_devices(){
         if(discovered==false)
@@ -133,15 +133,17 @@ public class GuestActivity extends ActionBarActivity {
                     });
         }
 
-        boolean check=false;
-            for (int i = 0; i < device_list.size(); i++) {
-                btManager.client(device_list.get(i));
-                check=btManager.valid_socket;
+
+        int i;
+            //test each discovered device until we find host
+            for (i = 0; i < device_list.size(); i++) {
+               boolean check= btManager.client(device_list.get(i));
+
                 if (check == true) {
                     //we connected to a host, we can now send data
                     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                    alertDialog.setTitle("Alert");
-                    alertDialog.setMessage("We have connected to host");
+                    alertDialog.setTitle("Success");
+                    alertDialog.setMessage("You have been signed in");
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
@@ -149,11 +151,15 @@ public class GuestActivity extends ActionBarActivity {
                                 }
                             });
                     alertDialog.show();
-                    break;
+
+                    return;
                 }
             }
-        if(check==false)
-        {
+
+
+        //if we reach here, means none of the threads connected
+
+
             AlertDialog alertDialog = new AlertDialog.Builder(this).create();
             alertDialog.setTitle("Error");
             alertDialog.setMessage("Host was not found");
@@ -164,7 +170,7 @@ public class GuestActivity extends ActionBarActivity {
                         }
                     });
             alertDialog.show();
-        }
+
     }
 
 
@@ -172,11 +178,9 @@ public class GuestActivity extends ActionBarActivity {
     public void findHost(View view) {
 
         final String name = ((EditText)(findViewById(R.id.name))).getText().toString();
-        //final String studentid=((EditText)(findViewById(R.id.name))).getText().toString();
-        //&&studentid.length()==9
+       // final String studentid=((EditText)(findViewById(R.id.studentid))).getText().toString();
+
         if (!name.equals("") && btManager.ready()) {
-         if(true)
-         {
 
              setContentView(R.layout.guest_search);
              BTadapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
@@ -185,16 +189,15 @@ public class GuestActivity extends ActionBarActivity {
              final ListView listView = (ListView) findViewById(R.id.devices_discovered);
              listView.setAdapter(BTadapter);
 
-             listDevices.add("Waiting for attendees....");
+             listDevices.add("Searching for host...");
              BTadapter.notifyDataSetChanged();
 
 
-            IntentFilter filter = new IntentFilter();
+            filter = new IntentFilter();
             filter.addAction(BluetoothDevice.ACTION_FOUND);
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
             filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
             this.registerReceiver(mReceiver, filter);
-
 
             if (btManager.adapter.isDiscovering()) {
                 //already discovering
@@ -217,7 +220,6 @@ public class GuestActivity extends ActionBarActivity {
                                 }
                             });
                 }
-
 
         }
         else {
@@ -246,7 +248,6 @@ public class GuestActivity extends ActionBarActivity {
 
              }*/
 
-            }
         }
     }
 }

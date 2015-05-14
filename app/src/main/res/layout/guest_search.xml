@@ -6,14 +6,6 @@
     android:weightSum="1">
 
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:text="Searching"
-        android:textSize="20pt"
-        android:gravity="center"
-        ></TextView>
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"

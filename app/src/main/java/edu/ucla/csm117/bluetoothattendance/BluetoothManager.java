@@ -25,7 +25,7 @@ public class BluetoothManager {
     final String NAME = "BluetoothAttendance";
     final UUID SERVICE_UUID = UUID.fromString("D952EB9F-7AD2-4B1B-B3CE-386735205990");
 
-    boolean valid_socket=false;
+  //  boolean valid_socket=false;
     final int REQUEST_ENABLE_BT = 1;
 
     private class AcceptThread extends Thread {
@@ -83,6 +83,7 @@ public class BluetoothManager {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
 
+        public boolean success=false;
         public ConnectThread(BluetoothDevice device) {
             BluetoothSocket tmp = null;
             mmDevice = device;
@@ -94,20 +95,14 @@ public class BluetoothManager {
                 //or device no longer has bluetooth
             }
             mmSocket = tmp;
-            if(mmSocket!=null)
-                valid_socket=true;
-/*
 
-            try {
-                mmSocket.connect();
-            }catch (Exception e){
-                //connection failed, maybe incorrect uuid
 
-            }
-*/
+
+
         }
 
-
+        //connect to server: if socket found, manage socket
+        //if socket not found or other errors, throw exception
         public void run() {
             // Cancel discovery because it will slow down the connection
             adapter.cancelDiscovery();
@@ -122,12 +117,16 @@ public class BluetoothManager {
                     mmSocket.close();
                 } catch (IOException closeException) {
                 }
+
                 return;
             }
 
             // Do work to manage the connection (in a separate thread)
             // manageConnectedSocket(mmSocket);
 
+
+
+            success=true;
         }
 
 
@@ -174,9 +173,16 @@ public class BluetoothManager {
         ConnectThread connectionThread = new ConnectThread(device);
         try {
             connectionThread.start();
+            connectionThread.join();
         } catch (Exception e) {
+
             return false;
         }
+        //failure
+
+        if(connectionThread.success==false)
+            return false;
+        //socket was found and managed
         return true;
 
     }
