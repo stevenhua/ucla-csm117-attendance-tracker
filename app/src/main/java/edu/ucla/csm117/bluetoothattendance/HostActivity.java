@@ -28,7 +28,7 @@ public class HostActivity extends ActionBarActivity{
         setContentView(R.layout.main_host);
 
         // request bluetooth as soon as host activity opens up
-        btManager = new BluetoothManager(this);
+        btManager = new BluetoothManager(this,true);
 
     }
 
@@ -112,4 +112,5 @@ public class HostActivity extends ActionBarActivity{
             }
         }
     }
+
 }

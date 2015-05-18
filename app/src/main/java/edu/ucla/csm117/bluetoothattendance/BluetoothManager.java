@@ -19,6 +19,9 @@ import java.util.UUID;
  * Created by matthew on 5/9/15.
  */
 public class BluetoothManager {
+    //discovery time in seconds minimum 0, maximum 3600, set to 0 for indefinite
+    private static final int DISCOVERY_TIME=300;
+
 
     BluetoothAdapter adapter;
     Activity activity;
@@ -41,6 +44,7 @@ public class BluetoothManager {
             } catch (IOException e) {
             }
             mmServerSocket = tmp;
+
         }
 
         public void run() {
@@ -144,17 +148,39 @@ public class BluetoothManager {
 
     public BluetoothManager(Activity activity) {
         // upon construction, get the bluetooth device
-
         this.adapter = BluetoothAdapter.getDefaultAdapter();
         this.activity = activity;
+        HelperConstructor();
 
+
+    }
+
+    public BluetoothManager(Activity activity, boolean isHost){
+        this.adapter = BluetoothAdapter.getDefaultAdapter();
+        this.activity = activity;
+        if(isHost==true)
+        {
+            Intent discoverableIntent=new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.setAction(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            //0 will make device discoverable indefinitely
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,DISCOVERY_TIME);
+            activity.startActivity(discoverableIntent);
+
+        }
+
+        HelperConstructor();
+    }
+
+    private void HelperConstructor(){
         // prep bluetooth device
         if (adapter != null && !adapter.isEnabled()) {
             // if adapter isn't enabled, request for it to be turned on
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+
     }
+
 
     public boolean server() {
 
