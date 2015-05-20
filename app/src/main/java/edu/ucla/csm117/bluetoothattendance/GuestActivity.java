@@ -11,11 +11,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.content.BroadcastReceiver;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -40,7 +40,9 @@ public class GuestActivity extends ActionBarActivity {
     ArrayAdapter<String> BTadapter;
     IntentFilter filter;
     boolean finished=false;
+    boolean end_early=false;
    // long start_discovering;
+    ListView devices_discovered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,8 @@ public class GuestActivity extends ActionBarActivity {
 
         // request bluetooth as soon as guest activity opens up
         btManager = new BluetoothManager(this);
+
+
     }
 
     @Override
@@ -89,7 +93,8 @@ public class GuestActivity extends ActionBarActivity {
             // When discovery finds a device
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
-               BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                enable_list();
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if(device_list.contains(device)==false) {
                     device_list.add(device);
 
@@ -110,16 +115,15 @@ public class GuestActivity extends ActionBarActivity {
             {
                 finished=true;
 
-                process_devices();
+                discovery_finished();
+                //process_devices();
             }
 
 
         }
     };
 
-
-
-    public void process_devices(){
+    public void discovery_finished(){
         if(discovered==false)
         {
             AlertDialog alertDialog = new AlertDialog.Builder(this).create();
@@ -131,13 +135,57 @@ public class GuestActivity extends ActionBarActivity {
                             dialog.dismiss();
                         }
                     });
+            alertDialog.show();
+            return;
         }
 
+        if(device_list.isEmpty()){
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("No Devices Found");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+            return;
+        }
+        if(end_early==false) {
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Finished Searching Please Select Host");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        }
+    }
 
-        int i;
+
+
+    public void enable_list(){
+        ListView lv=(ListView)findViewById(R.id.devices_discovered);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position!=0) {
+                    end_early=true;
+                    process_device(position-1);
+                }
+            }
+        });
+
+    }
+
+    public void process_device(int list_pos){
             //test each discovered device until we find host
-            for (i = 0; i < device_list.size(); i++) {
-               boolean check= btManager.client(device_list.get(i));
+           // for (int i = 0; i < device_list.size(); i++) {
+               boolean check= btManager.client(device_list.get(list_pos));
 
                 if (check == true) {
                     //we connected to a host, we can now send data
@@ -154,15 +202,11 @@ public class GuestActivity extends ActionBarActivity {
 
                     return;
                 }
-            }
-
-
-        //if we reach here, means none of the threads connected
-
+           // }
 
             AlertDialog alertDialog = new AlertDialog.Builder(this).create();
             alertDialog.setTitle("Error");
-            alertDialog.setMessage("Host was not found");
+            alertDialog.setMessage("Could not connect to host");
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -178,9 +222,10 @@ public class GuestActivity extends ActionBarActivity {
     public void findHost(View view) {
 
         final String name = ((EditText)(findViewById(R.id.name))).getText().toString();
-       // final String studentid=((EditText)(findViewById(R.id.studentid))).getText().toString();
-
-        if (!name.equals("") && btManager.ready()) {
+        //removed to make testing faster, add back later
+        //final String studentid=((EditText)(findViewById(R.id.studentid))).getText().toString();
+        //&& studentid.length()==9
+        if (!name.equals("") &&btManager.ready()) {
 
              setContentView(R.layout.guest_search);
              BTadapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
@@ -219,6 +264,7 @@ public class GuestActivity extends ActionBarActivity {
                                     dialog.dismiss();
                                 }
                             });
+                    alertDialog.show();
                 }
 
         }
@@ -234,7 +280,7 @@ public class GuestActivity extends ActionBarActivity {
                              }
                          });
                  alertDialog.show();
-             } /*else if (studentid.length() != 9) {
+             }/* else if (studentid.length() != 9) {
 
                  AlertDialog alertDialog = new AlertDialog.Builder(this).create();
                  alertDialog.setTitle("Error");
@@ -245,9 +291,10 @@ public class GuestActivity extends ActionBarActivity {
                                  dialog.dismiss();
                              }
                          });
+                         alertDialog.show();
 
-             }*/
-
+             }
+            */
         }
     }
 }
