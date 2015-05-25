@@ -330,6 +330,10 @@ public class BluetoothManager {
         return true;
     }
 
+    public boolean setName(String name) {
+        return adapter.setName(name);
+    }
+
     public boolean client(BluetoothDevice device){
         ConnectThread connectionThread = new ConnectThread(device);
         try {
