@@ -10,9 +10,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-
+import android.os.Handler;
 import java.util.ArrayList;
-
+import android.os.Message;
 /**
  * Created by matthew on 5/6/15.
  */
@@ -21,14 +21,31 @@ public class HostActivity extends ActionBarActivity{
     BluetoothManager btManager;
     ArrayList<String> listItems = new ArrayList<String>();
     ArrayAdapter<String> adapter;
+    Handler message_handler;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_host);
 
+        message_handler=new Handler() {
+            @Override
+            public void handleMessage(Message msg){
+                switch(msg.what){
+                    case 1:
+                        listItems.add(msg.obj.toString());
+                        adapter.notifyDataSetChanged();
+                        //  break;
+                }
+                super.handleMessage(msg);
+            }
+        };
+
+
+
         // request bluetooth as soon as host activity opens up
-        btManager = new BluetoothManager(this,true);
+        btManager = new BluetoothManager(this,message_handler);
 
     }
 
@@ -60,9 +77,10 @@ public class HostActivity extends ActionBarActivity{
 
         if(!hostName.equals("") && btManager.ready() && btManager.server()) {
             // we are hosting successfully
+
             setContentView(R.layout.hosting_host);
 
-            adapter=new ArrayAdapter<String>(this,
+            adapter = new ArrayAdapter<String>(this,
                     android.R.layout.simple_list_item_1,
                     listItems);
 
@@ -74,14 +92,15 @@ public class HostActivity extends ActionBarActivity{
 
             AlertDialog alertDialog = new AlertDialog.Builder(this).create();
             alertDialog.setTitle("Success!");
-            alertDialog.setMessage("Host \""+hostName+"\" is now waiting for attendees to register");
+            alertDialog.setMessage("Host \"" + hostName + "\" is now waiting for attendees to register");
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                        }
-                    });
+                            }
+                        });
             alertDialog.show();
+            btManager.keep_running=false;
 
         } else {
             // failed to host
@@ -114,3 +133,4 @@ public class HostActivity extends ActionBarActivity{
     }
 
 }
+

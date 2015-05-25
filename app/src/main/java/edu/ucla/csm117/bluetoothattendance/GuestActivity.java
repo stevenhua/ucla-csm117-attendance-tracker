@@ -41,9 +41,10 @@ public class GuestActivity extends ActionBarActivity {
     IntentFilter filter;
     boolean finished=false;
     boolean end_early=false;
-   // long start_discovering;
+    // long start_discovering;
     ListView devices_discovered;
-
+    String name;
+    String studentid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +87,7 @@ public class GuestActivity extends ActionBarActivity {
     }
 
     private final BroadcastReceiver mReceiver=new BroadcastReceiver()
-     {
+    {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -183,30 +184,18 @@ public class GuestActivity extends ActionBarActivity {
     }
 
     public void process_device(int list_pos){
-            //test each discovered device until we find host
-           // for (int i = 0; i < device_list.size(); i++) {
-               boolean check= btManager.client(device_list.get(list_pos));
+        //test each discovered device until we find host
+        // for (int i = 0; i < device_list.size(); i++) {
+        btManager.name=name;
+        btManager.name+=" ";
+        btManager.studentid=studentid;
+        boolean check= btManager.client(device_list.get(list_pos));
 
-                if (check == true) {
-                    //we connected to a host, we can now send data
-                    AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                    alertDialog.setTitle("Success");
-                    alertDialog.setMessage("You have been signed in");
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
-
-                    return;
-                }
-           // }
-
+        if (check == true) {
+            //we connected to a host, we can now send data
             AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-            alertDialog.setTitle("Error");
-            alertDialog.setMessage("Could not connect to host");
+            alertDialog.setTitle("Success");
+            alertDialog.setMessage("You have been signed in");
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -215,28 +204,42 @@ public class GuestActivity extends ActionBarActivity {
                     });
             alertDialog.show();
 
+            return;
+        }
+        // }
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage("Could not connect to host");
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+
     }
 
 
 
     public void findHost(View view) {
 
-        final String name = ((EditText)(findViewById(R.id.name))).getText().toString();
+        name = ((EditText)(findViewById(R.id.name))).getText().toString();
         //removed to make testing faster, add back later
-        //final String studentid=((EditText)(findViewById(R.id.studentid))).getText().toString();
+        studentid=((EditText)(findViewById(R.id.studentid))).getText().toString();
         //&& studentid.length()==9
         if (!name.equals("") &&btManager.ready()) {
 
-             setContentView(R.layout.guest_search);
-             BTadapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-                     listDevices);
+            setContentView(R.layout.guest_search);
+            BTadapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                    listDevices);
 
-             final ListView listView = (ListView) findViewById(R.id.devices_discovered);
-             listView.setAdapter(BTadapter);
+            final ListView listView = (ListView) findViewById(R.id.devices_discovered);
+            listView.setAdapter(BTadapter);
 
-             listDevices.add("Searching for host...");
-             BTadapter.notifyDataSetChanged();
-
+            listDevices.add("Searching for host...");
+            BTadapter.notifyDataSetChanged();
 
             filter = new IntentFilter();
             filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -249,38 +252,36 @@ public class GuestActivity extends ActionBarActivity {
                 btManager.adapter.cancelDiscovery();
             }
 
+            try {
+                discovered= btManager.adapter.startDiscovery();
+            } catch(Exception e)
+            {
 
-                try {
-                   discovered= btManager.adapter.startDiscovery();
-                } catch(Exception e)
-                {
-
-                    AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                    alertDialog.setTitle("Error");
-                    alertDialog.setMessage("error discovering");
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
-                }
-
+                AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                alertDialog.setTitle("Error");
+                alertDialog.setMessage("error discovering");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
         }
         else {
-             if (name.equals("")) {
-                 AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                 alertDialog.setTitle("Error");
-                 alertDialog.setMessage("Name cannot be empty. Please input a valid name");
-                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                         new DialogInterface.OnClickListener() {
-                             public void onClick(DialogInterface dialog, int which) {
-                                 dialog.dismiss();
-                             }
-                         });
-                 alertDialog.show();
-             }/* else if (studentid.length() != 9) {
+            if (name.equals("")) {
+                AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                alertDialog.setTitle("Error");
+                alertDialog.setMessage("Name cannot be empty. Please input a valid name");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }/* else if (studentid.length() != 9) {
 
                  AlertDialog alertDialog = new AlertDialog.Builder(this).create();
                  alertDialog.setTitle("Error");
@@ -297,4 +298,6 @@ public class GuestActivity extends ActionBarActivity {
             */
         }
     }
+
 }
+
