@@ -58,7 +58,7 @@ public class HostActivity extends ActionBarActivity{
 
         final String hostName = ((EditText)(findViewById(R.id.hostname))).getText().toString();
 
-        if(!hostName.equals("") && btManager.ready() && btManager.server()) {
+        if(!hostName.equals("") && btManager.ready() && btManager.setName(hostName) && btManager.server()) {
             // we are hosting successfully
             setContentView(R.layout.hosting_host);
 
