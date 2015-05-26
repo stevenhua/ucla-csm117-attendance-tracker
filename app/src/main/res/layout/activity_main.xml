@@ -27,12 +27,14 @@
         android:textColor="#FFFFFF"
         android:textSize="16pt"
         android:id="@+id/host"
-        android:layout_marginBottom="30dp"
-        android:layout_above="@+id/guest"
         android:clickable="true"
         android:enabled="true"
         android:onClick="openHostActivity"
-        android:focusableInTouchMode="false" />
+        android:focusableInTouchMode="false"
+        android:layout_above="@+id/guest"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="10dp" />
 
     <Button
         android:layout_width="match_parent"
@@ -47,10 +49,11 @@
         android:textColor="#FFFFFF"
         android:textSize="16pt"
         android:id="@+id/guest"
-        android:layout_marginBottom="30dp"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/history"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="10dp" />
+
 
     <ImageView
         android:layout_width="wrap_content"
@@ -59,6 +62,23 @@
         android:src="@drawable/logo"
         android:layout_above="@+id/host"
         android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:padding="10dp"
+        android:text="PAST EVENTS"
+        android:background="@android:color/holo_blue_dark"
+        android:fontFamily="sans-serif-light"
+        android:clickable="true"
+        android:enabled="true"
+        android:onClick="openHistoryActivity"
+        android:textColor="#FFFFFF"
+        android:textSize="16pt"
+        android:id="@+id/history"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

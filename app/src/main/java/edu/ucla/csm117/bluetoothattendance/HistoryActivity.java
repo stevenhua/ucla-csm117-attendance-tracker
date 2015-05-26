@@ -1,22 +1,34 @@
 package edu.ucla.csm117.bluetoothattendance;
 
-
-import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import java.util.ArrayList;
 
-public class MainActivity extends ActionBarActivity {
+/**
+ * Created by matthew on 5/25/15.
+ */
+public class HistoryActivity extends ActionBarActivity {
 
-    @Override
+    private ArrayList<String> listEvents = new ArrayList<String>();
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.history_list);
 
-        setContentView(R.layout.activity_main);
+        ArrayAdapter<String> HistoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                listEvents);
+
+        final ListView listView = (ListView) findViewById(R.id.eventsListView);
+        listView.setAdapter(HistoryAdapter);
+
+        listEvents.add("Past Event Rosters");
+        HistoryAdapter.notifyDataSetChanged();
+
     }
 
     @Override
@@ -41,18 +53,4 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void openHistoryActivity(View view) {
-        Intent intent = new Intent(this, HistoryActivity.class);
-        startActivity(intent);
-    }
-
-    public void openHostActivity(View view) {
-        Intent intent = new Intent(this, HostActivity.class);
-        startActivity(intent);
-    }
-
-    public void openGuestActivity(View view) {
-        Intent intent = new Intent(this, GuestActivity.class);
-        startActivity(intent);
-    }
 }

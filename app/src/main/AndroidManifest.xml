@@ -46,6 +46,12 @@
             android:label="@string/app_name" >
         </activity>
 
+        <!-- HISTORY ACTIVITY: USE TO SHOW PAST EVENT ROSTERS -->
+        <activity
+            android:name=".HistoryActivity"
+            android:screenOrientation="portrait">
+            android:label="@string/app_name" >
+        </activity>
     </application>
 
 </manifest>
