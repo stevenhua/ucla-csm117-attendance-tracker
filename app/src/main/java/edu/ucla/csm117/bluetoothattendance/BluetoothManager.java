@@ -39,75 +39,75 @@ public class BluetoothManager {
     Activity test_activity;
     final String NAME = "BluetoothAttendance";
     final UUID SERVICE_UUID = UUID.fromString("D952EB9F-7AD2-4B1B-B3CE-386735205990");
-    ConcurrentHashMap<UUID, Integer> UUID_MAP=new ConcurrentHashMap<UUID,Integer>();
     ArrayList<UUID> UUID_LIST=new ArrayList<UUID>();
     boolean isHost;
-    final int MAX_CONNECTIONS=2;
+    final int MAX_CONNECTIONS=7;
     String name;
     String studentid;
-    int CURRENT_CONNECTIONS=0;
-    Handler myHandler;
+    Handler hostHandler;
     boolean keep_running=true;
     //  boolean valid_socket=false;
     final int REQUEST_ENABLE_BT = 1;
 
+
+
     private class AcceptThread extends Thread{
         private BluetoothServerSocket mmServerSocket;
         private InputStream mmInStream;
-        public AcceptThread() {
-            // Use a temporary object that is later assigned to mmServerSocket,
-            // because mmServerSocket is final
-            BluetoothServerSocket tmp = null;
-            try {
-                // SERVICE_UUID is the app's UUID string, also used by the client code
-                tmp = adapter.listenUsingRfcommWithServiceRecord(NAME, SERVICE_UUID);
-            } catch (IOException e) {
-            }
-            mmServerSocket = tmp;
-
+        private final UUID connect_uuid;
+        public AcceptThread(UUID uuid) {
+            connect_uuid=uuid;
         }
 
         public void run() {
-            BluetoothSocket socket = null;
-            // Keep listening until exception occurs or a socket is returned
             while (true) {
+                BluetoothServerSocket tmp = null;
                 try {
-                    socket = mmServerSocket.accept();
+                    // connect_uuid is one of 7 uuids used by app, also used by the client code
+                    tmp = adapter.listenUsingRfcommWithServiceRecord(NAME,connect_uuid);
                 } catch (IOException e) {
-                    break;
                 }
-                // If a connection was accepted
-                if (socket != null) {
-                    // Do work to manage the connection (in a separate thread)
-
-                    InputStream tmpIn=null;
-                    try{
-                        tmpIn=socket.getInputStream();
-                    }catch(IOException e){
-                    }
-                    mmInStream=tmpIn;
-
-                    name=readStream();
-
-
-                    if(name!=null) {
-                        Message msg = Message.obtain();
-                        msg.obj = name;
-                        msg.what = 1;
-                        // myHandler.sendMessage(msg);
-                        msg.setTarget(myHandler);
-                        msg.sendToTarget();
-                    }
+                mmServerSocket = tmp;
+                BluetoothSocket socket = null;
+                // Keep listening until exception occurs or a socket is returned
+                while (true) {
                     try {
-                        mmServerSocket.close();
+                        socket = mmServerSocket.accept();
                     } catch (IOException e) {
                         break;
                     }
-                    break;
+                    // If a connection was accepted
+                    if (socket != null) {
+                        // Do work to manage the connection (in a separate thread)
+
+                        InputStream tmpIn = null;
+                        try {
+                            tmpIn = socket.getInputStream();
+                        } catch (IOException e) {
+                        }
+                        mmInStream = tmpIn;
+
+                        String tmp_name = readStream();
+
+
+                        if (tmp_name != null) {
+                            Message msg = Message.obtain();
+                            msg.obj = tmp_name;
+                            msg.what = 1;
+                            // myHandler.sendMessage(msg);
+                            msg.setTarget(hostHandler);
+                            msg.sendToTarget();
+                        }
+                        try {
+                            mmServerSocket.close();
+                        } catch (IOException e) {
+                            break;
+                        }
+                        break;
+                    }
                 }
             }
         }
-
         /**
          * Will cancel the listening socket, and cause the thread to finish
          */
@@ -244,21 +244,6 @@ public class BluetoothManager {
         adapter = BluetoothAdapter.getDefaultAdapter();
         this.my_guest_activity= activity;
         //7 UUIDs to use
-        UUID temp_UUID = UUID.fromString("D952EB9F-7AD2-4B1B-B3CE-386735205990");
-        UUID_LIST.add(temp_UUID);
-        temp_UUID=UUID.fromString("6109c720-fe5a-11e4-bd7f-0002a5d5c51b");
-        UUID_LIST.add(temp_UUID);
-        temp_UUID=UUID.fromString("77d4bd20-fe5a-11e4-9931-0002a5d5c51b");
-        UUID_LIST.add(temp_UUID);
-        temp_UUID=UUID.fromString("7ee1da80-fe5a-11e4-bc0c-0002a5d5c51b");
-        UUID_LIST.add(temp_UUID);
-        temp_UUID=UUID.fromString("847db4a0-fe5a-11e4-ac89-0002a5d5c51b");
-        UUID_LIST.add(temp_UUID);
-        temp_UUID=UUID.fromString("8ae2f940-fe5a-11e4-b19b-0002a5d5c51b");
-        UUID_LIST.add(temp_UUID);
-        temp_UUID=UUID.fromString("8fbe90a0-fe5a-11e4-b7c2-0002a5d5c51b");
-        UUID_LIST.add(temp_UUID);
-
         isHost=false;
         HelperConstructor();
     }
@@ -266,40 +251,38 @@ public class BluetoothManager {
     public BluetoothManager(HostActivity activity, Handler handler){
         this.adapter = BluetoothAdapter.getDefaultAdapter();
         this.my_host_activity = activity;
-        //     this.test_activity=activity;
         Intent discoverableIntent=new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.setAction(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         //0 will make device discoverable indefinitely
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,DISCOVERY_TIME);
         activity.startActivity(discoverableIntent);
-
-        //7 UUIDs to use
-        UUID temp_UUID = UUID.fromString("D952EB9F-7AD2-4B1B-B3CE-386735205990");
-        UUID_MAP.put(temp_UUID,0);
-        temp_UUID=UUID.fromString("6109c720-fe5a-11e4-bd7f-0002a5d5c51b");
-        UUID_MAP.put(temp_UUID,0);
-        temp_UUID=UUID.fromString("77d4bd20-fe5a-11e4-9931-0002a5d5c51b");
-        UUID_MAP.put(temp_UUID,0);
-        temp_UUID=UUID.fromString("7ee1da80-fe5a-11e4-bc0c-0002a5d5c51b");
-        UUID_MAP.put(temp_UUID,0);
-        temp_UUID=UUID.fromString("847db4a0-fe5a-11e4-ac89-0002a5d5c51b");
-        UUID_MAP.put(temp_UUID,0);
-        temp_UUID=UUID.fromString("8ae2f940-fe5a-11e4-b19b-0002a5d5c51b");
-        UUID_MAP.put(temp_UUID,0);
-        temp_UUID=UUID.fromString("8fbe90a0-fe5a-11e4-b7c2-0002a5d5c51b");
-        UUID_MAP.put(temp_UUID,0);
-
         isHost=true;
-        myHandler=handler;
+        hostHandler=handler;
         HelperConstructor();
     }
 
     private void HelperConstructor(){
         // prep bluetooth device
+        //7 uuids to use
+        UUID temp_UUID = UUID.fromString("D952EB9F-7AD2-4B1B-B3CE-386735205990");
+        UUID_LIST.add(temp_UUID);
+        temp_UUID=UUID.fromString("6109c720-fe5a-11e4-bd7f-0002a5d5c51b");
+        UUID_LIST.add(temp_UUID);
+        temp_UUID=UUID.fromString("77d4bd20-fe5a-11e4-9931-0002a5d5c51b");
+        UUID_LIST.add(temp_UUID);
+        temp_UUID=UUID.fromString("7ee1da80-fe5a-11e4-bc0c-0002a5d5c51b");
+        UUID_LIST.add(temp_UUID);
+        temp_UUID=UUID.fromString("847db4a0-fe5a-11e4-ac89-0002a5d5c51b");
+        UUID_LIST.add(temp_UUID);
+        temp_UUID=UUID.fromString("8ae2f940-fe5a-11e4-b19b-0002a5d5c51b");
+        UUID_LIST.add(temp_UUID);
+        temp_UUID=UUID.fromString("8fbe90a0-fe5a-11e4-b7c2-0002a5d5c51b");
+        UUID_LIST.add(temp_UUID);
+
+
         if (adapter != null && !adapter.isEnabled()) {
             // if adapter isn't enabled, request for it to be turned on
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-
             if(isHost)
                 my_host_activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             else
@@ -311,22 +294,14 @@ public class BluetoothManager {
 
 
     public boolean server() {
-
-        //TODO:create a new type of thread or async task or w.e
-        //server() will start this thread
-        //this thread will run in a loop, polling
-        //while UUID_MAP.size()!=MAX_CONNECTIONS it will spawn acceptthreads
-        //if it hits the max connections, it will sleep for however many seconds
-        //when the device is no longer discoverable, stop this thread since no devices
-        //can find it
-        // start a new AcceptThread to accept and handle connections
-        AcceptThread connectionAcceptor = new AcceptThread();
+       for(int i=0;i<UUID_LIST.size();i++) {
+           AcceptThread connectionAcceptor = new AcceptThread(UUID_LIST.get(i));
            try {
                connectionAcceptor.start();
            } catch (Exception e) {
                return false;
            }
-
+       }
         return true;
     }
 

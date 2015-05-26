@@ -34,7 +34,8 @@ public class HostActivity extends ActionBarActivity{
             public void handleMessage(Message msg){
                 switch(msg.what){
                     case 1:
-                        listItems.add(msg.obj.toString());
+                        String data=msg.obj.toString();
+                        listItems.add(data);
                         adapter.notifyDataSetChanged();
                         //  break;
                 }
