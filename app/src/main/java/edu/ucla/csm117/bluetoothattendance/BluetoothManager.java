@@ -73,7 +73,7 @@ public class BluetoothManager {
                 while (true) {
                     try {
                         socket = mmServerSocket.accept();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         break;
                     }
                     // If a connection was accepted
@@ -84,6 +84,8 @@ public class BluetoothManager {
                         try {
                             tmpIn = socket.getInputStream();
                         } catch (IOException e) {
+                            cancel();
+                            break;
                         }
                         mmInStream = tmpIn;
 
@@ -97,7 +99,13 @@ public class BluetoothManager {
                             // myHandler.sendMessage(msg);
                             msg.setTarget(hostHandler);
                             msg.sendToTarget();
+                            try {
+                                mmInStream.close();
+                            }catch(Exception e){
+
+                            }
                         }
+
                         try {
                             mmServerSocket.close();
                         } catch (IOException e) {
@@ -105,6 +113,7 @@ public class BluetoothManager {
                         }
                         break;
                     }
+                    break;
                 }
             }
         }
@@ -120,7 +129,7 @@ public class BluetoothManager {
 
         public String readStream(){
             int bytesRead=-1;
-            int buffersize=1024;
+            int buffersize=256;
             byte[] buffer=new byte[buffersize];
             String message="";
             try {
@@ -190,7 +199,8 @@ public class BluetoothManager {
             mmOutStream=tmpOut;
 
             //write to outstream, set success to false on failure
-            String info=name+studentid;
+
+            String info=name+studentid+" "+adapter.getAddress();
             if(!write(info))
                 success=false;
         }
@@ -294,6 +304,7 @@ public class BluetoothManager {
 
 
     public boolean server() {
+
        for(int i=0;i<UUID_LIST.size();i++) {
            AcceptThread connectionAcceptor = new AcceptThread(UUID_LIST.get(i));
            try {
