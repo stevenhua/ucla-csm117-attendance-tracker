@@ -1,5 +1,7 @@
 package edu.ucla.csm117.bluetoothattendance;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -27,6 +29,28 @@ public class HistoryActivity extends ActionBarActivity {
         listView.setAdapter(HistoryAdapter);
 
         listEvents.add("Past Event Rosters");
+
+        // load in the saved past rosters from db
+        HistoryDatabase rosters = new HistoryDatabase(this);
+        SQLiteDatabase db = rosters.getReadableDatabase();
+
+        String[] columns = {"Timestamp", "Person"};
+
+        Cursor results = db.query("People", columns, null, null, "Timestamp", null, null);
+
+
+        if (results.moveToFirst() ){
+            String[] columnNames = results.getColumnNames();
+            do {
+                String row = "";
+                for (String name: columnNames) {
+                    row += String.format("%s: %s\n", name,
+                            results.getString(results.getColumnIndex(name)));
+                }
+                listEvents.add(row);
+            } while (results.moveToNext());
+        }
+
         HistoryAdapter.notifyDataSetChanged();
 
     }

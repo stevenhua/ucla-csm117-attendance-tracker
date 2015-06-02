@@ -1,7 +1,10 @@
 package edu.ucla.csm117.bluetoothattendance;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -13,6 +16,7 @@ import android.widget.ListView;
 import android.os.Handler;
 import java.util.ArrayList;
 import android.os.Message;
+import android.content.ContentValues;
 /**
  * Created by matthew on 5/6/15.
  */
@@ -22,12 +26,16 @@ public class HostActivity extends ActionBarActivity{
     ArrayList<String> listItems = new ArrayList<String>();
     ArrayAdapter<String> adapter;
     Handler message_handler;
-
+    HistoryDatabase registrations;
+    SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_host);
+
+        registrations = new HistoryDatabase(this);
+        db = registrations.getWritableDatabase();
 
         message_handler=new Handler() {
             @Override
@@ -37,13 +45,26 @@ public class HostActivity extends ActionBarActivity{
                         String data=msg.obj.toString();
                         listItems.add(data);
                         adapter.notifyDataSetChanged();
+                        // add items to databse
+                        ContentValues values = new ContentValues();
+                        values.put("Person",data);
+                        db.insert("People", "Person", values);
                         //  break;
                 }
                 super.handleMessage(msg);
             }
         };
 
-
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage(Integer.toString(db.rawQuery("select * from People", null).getCount()));
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
 
         // request bluetooth as soon as host activity opens up
         btManager = new BluetoothManager(this,message_handler);
