@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.content.BroadcastReceiver;
+import android.content.SharedPreferences;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -45,6 +46,10 @@ public class GuestActivity extends ActionBarActivity {
     ListView devices_discovered;
     String name;
     String studentid;
+    public static final String PREFS_NAME="BTAttendance";
+    private static final String PREF_NAME="name";
+    private static final String PREF_ID="studentid";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,13 +58,31 @@ public class GuestActivity extends ActionBarActivity {
         // request bluetooth as soon as guest activity opens up
         btManager = new BluetoothManager(this);
 
+        SharedPreferences prefs=getSharedPreferences(PREFS_NAME,MODE_PRIVATE);
+        String restored_name=prefs.getString(PREF_NAME,null);
+        String restored_id=prefs.getString(PREF_ID,null);
+        if(restored_name!=null) {
+            EditText guest_name=(EditText)(findViewById(R.id.name));
+            guest_name.setText(restored_name);
+        }
+
+        if(restored_id!=null){
+            EditText guest_id=(EditText)(findViewById(R.id.studentid));
+            guest_id.setText(restored_id);
+        }
+
 
     }
 
     @Override
     public void onDestroy()
     {
-        unregisterReceiver(mReceiver);
+        try {
+            unregisterReceiver(mReceiver);
+        }catch(IllegalArgumentException e){
+
+        }
+
         super.onDestroy();
     }
 
@@ -226,10 +249,16 @@ public class GuestActivity extends ActionBarActivity {
     public void findHost(View view) {
 
         name = ((EditText)(findViewById(R.id.name))).getText().toString();
-        //removed to make testing faster, add back later
         studentid=((EditText)(findViewById(R.id.studentid))).getText().toString();
         //&& studentid.length()==9
+
+
         if (!name.equals("") &&btManager.ready()) {
+
+            SharedPreferences.Editor editor=getSharedPreferences(PREFS_NAME,MODE_PRIVATE).edit();
+            editor.putString(PREF_NAME,name);
+            editor.putString(PREF_ID,studentid);
+            editor.commit();
 
             setContentView(R.layout.guest_search);
             BTadapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
