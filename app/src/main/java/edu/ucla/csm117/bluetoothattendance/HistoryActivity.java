@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -17,12 +18,13 @@ import java.util.ArrayList;
 public class HistoryActivity extends ActionBarActivity {
 
     private ArrayList<String> listEvents = new ArrayList<String>();
+    private ArrayAdapter<String> HistoryAdapter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.history_list);
 
-        ArrayAdapter<String> HistoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+        HistoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
                 listEvents);
 
         final ListView listView = (ListView) findViewById(R.id.eventsListView);
@@ -58,7 +60,7 @@ public class HistoryActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_history, menu);
         return true;
     }
 
@@ -70,7 +72,20 @@ public class HistoryActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_clear) {
+            HistoryDatabase rosters = new HistoryDatabase(this);
+            SQLiteDatabase db = rosters.getReadableDatabase();
+
+            db.delete("People", null, null);
+
+            db.close();
+
+            listEvents.clear();
+
+            listEvents.add("Past Event Rosters");
+
+            HistoryAdapter.notifyDataSetChanged();
+
             return true;
         }
 
