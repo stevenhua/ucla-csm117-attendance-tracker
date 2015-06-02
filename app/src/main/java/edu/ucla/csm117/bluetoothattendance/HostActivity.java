@@ -55,17 +55,6 @@ public class HostActivity extends ActionBarActivity{
             }
         };
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Error");
-        alertDialog.setMessage(Integer.toString(db.rawQuery("select * from People", null).getCount()));
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
-
         // request bluetooth as soon as host activity opens up
         btManager = new BluetoothManager(this,message_handler);
 

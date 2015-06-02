@@ -200,7 +200,7 @@ public class BluetoothManager {
 
             //write to outstream, set success to false on failure
 
-            String info=name+studentid+" "+adapter.getAddress();
+            String info="Name: " + name + "\n" + "UID: "+ studentid +"\n"+ "Address: " + adapter.getAddress();
             if(!write(info))
                 success=false;
         }
