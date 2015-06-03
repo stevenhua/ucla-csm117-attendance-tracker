@@ -109,11 +109,17 @@ public class HostActivity extends ActionBarActivity{
             AlertDialog.Builder builder=new AlertDialog.Builder(this);
             builder.setTitle("Really Exit?");
             builder.setMessage("Exiting will end the hosting period");
-            builder.setPositiveButton(android.R.string.no,null);
+            builder.setPositiveButton(android.R.string.no, null);
+            builder.setNeutralButton("Rehost",new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    btManager.enable_discovery();
+                }
+            });
             builder.setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    hosting_screen=false;
+                    hosting_screen = false;
                     HostActivity.super.onBackPressed();
                 }
             });

@@ -292,6 +292,14 @@ public class BluetoothManager {
         HelperConstructor();
     }
 
+    public void enable_discovery(){
+        Intent discoverableIntent=new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        discoverableIntent.setAction(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        //0 will make device discoverable indefinitely
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,DISCOVERY_TIME);
+        my_host_activity.startActivity(discoverableIntent);
+    }
+
     private void HelperConstructor(){
         // prep bluetooth device
         //7 uuids to use
@@ -313,12 +321,14 @@ public class BluetoothManager {
 
         if (adapter != null && !adapter.isEnabled()) {
             // if adapter isn't enabled, request for it to be turned on
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            if(isHost)
-                my_host_activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            else
+
+            if (!isHost) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                //      my_host_activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                // else
                 my_guest_activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
+            }
         }
 
     }
