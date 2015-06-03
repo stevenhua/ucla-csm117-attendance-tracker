@@ -59,7 +59,7 @@ public class HostActivity extends ActionBarActivity{
                         String data=msg.obj.toString();
                         int start_index=data.indexOf("Address: ");
                         String data_address=data.substring(start_index);
-                        //if(!used_devices.contains(data_address)) {
+                        if(!used_devices.contains(data_address)) {
                             used_devices.add(data_address);
                             listItems.add(data);
                             adapter.notifyDataSetChanged();
@@ -70,7 +70,7 @@ public class HostActivity extends ActionBarActivity{
                             values.put("EventTime", eventDate);
                             db.insert("People", null, values);
                             //  break
-                      //  }
+                        }
                 }
                 super.handleMessage(msg);
             }

@@ -197,9 +197,9 @@ public class GuestActivity extends ActionBarActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position!=0) {
-                    end_early=true;
-                    process_device(position-1);
+                if (position != 0) {
+                    end_early = true;
+                    process_device(position - 1);
                 }
             }
         });
@@ -253,7 +253,7 @@ public class GuestActivity extends ActionBarActivity {
         //&& studentid.length()==9
 
 
-        if (!name.equals("") &&btManager.ready()) {
+        if (!name.equals("") && studentid.length()==9 &&btManager.ready()) {
 
             SharedPreferences.Editor editor=getSharedPreferences(PREFS_NAME,MODE_PRIVATE).edit();
             editor.putString(PREF_NAME,name);
@@ -310,7 +310,7 @@ public class GuestActivity extends ActionBarActivity {
                             }
                         });
                 alertDialog.show();
-            }/* else if (studentid.length() != 9) {
+            } else if (studentid.length() != 9) {
 
                  AlertDialog alertDialog = new AlertDialog.Builder(this).create();
                  alertDialog.setTitle("Error");
@@ -324,7 +324,7 @@ public class GuestActivity extends ActionBarActivity {
                          alertDialog.show();
 
              }
-            */
+
         }
     }
 
