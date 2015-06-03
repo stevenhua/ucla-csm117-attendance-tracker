@@ -10,7 +10,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.lang.reflect.Array;
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by matthew on 5/25/15.
@@ -36,22 +38,43 @@ public class HistoryActivity extends ActionBarActivity {
         HistoryDatabase rosters = new HistoryDatabase(this);
         SQLiteDatabase db = rosters.getReadableDatabase();
 
-        String[] columns = {"Timestamp", "Person"};
+        String[] columns = {"Timestamp", "Person", "EventHost", "EventTime"};
+
+        String[] event = {"EventTime","EventHost"};
+
+        Cursor event_times = db.query(true, "People", event, null, null, null, null, null, null);
 
         Cursor results = db.query("People", columns, null, null, "Timestamp", null, null);
 
 
-        if (results.moveToFirst() ){
-            String[] columnNames = results.getColumnNames();
+        if (event_times.moveToFirst()) {
             do {
-                String row = "";
-                for (String name: columnNames) {
-                    row += String.format("%s: %s\n", name,
-                            results.getString(results.getColumnIndex(name)));
+                String eventTime = event_times.getString(event_times.getColumnIndex("EventTime"));
+                String eventHost = event_times.getString(event_times.getColumnIndex("EventHost"));
+                if (results.moveToFirst() ){
+                    listEvents.add("Event:\n  Host: "+eventHost+"\n  Time: "+eventTime);
+                    String[] columnNames = results.getColumnNames();
+
+                    do {
+                        String row = "";
+                        if (results.getString(results.getColumnIndex("EventTime")).equals(eventTime) && results.getString(results.getColumnIndex("EventHost")).equals(eventHost)) {
+                            // same event time and host so include in this section
+                            for (String name: columnNames) {
+                                if (name.equals("Person") || name.equals("Timestamp"))
+                                    if (name.equals("Timestamp"))
+                                        row += String.format("Time: %s\n", results.getString(results.getColumnIndex(name)));
+                                    else
+                                        row += String.format("%s", results.getString(results.getColumnIndex(name)));
+                        }
+                        }
+                        if (!row.equals(""))
+                            listEvents.add(row);
+                    } while (results.moveToNext());
+                    if (!event_times.isLast())
+                        listEvents.add("---");
                 }
-                listEvents.add(row);
-            } while (results.moveToNext());
-        }
+            } while (event_times.moveToNext());
+            }
 
         HistoryAdapter.notifyDataSetChanged();
 

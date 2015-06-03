@@ -14,7 +14,12 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.os.Handler;
+
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
+
 import android.os.Message;
 import android.content.ContentValues;
 /**
@@ -34,6 +39,13 @@ public class HostActivity extends ActionBarActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_host);
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        final String eventDate = dateFormat.format(date);
+
+        final EditText hostname_widget = (EditText)findViewById(R.id.hostname);
+
         registrations = new HistoryDatabase(this);
         db = registrations.getWritableDatabase();
 
@@ -48,8 +60,10 @@ public class HostActivity extends ActionBarActivity{
                         // add items to databse
                         ContentValues values = new ContentValues();
                         values.put("Person",data);
-                        db.insert("People", "Person", values);
-                        //  break;
+                        values.put("EventHost", hostname_widget.getText().toString());
+                        values.put("EventTime", eventDate);
+                        db.insert("People", null, values);
+                        //  break
                 }
                 super.handleMessage(msg);
             }

@@ -9,13 +9,15 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class HistoryDatabase extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "RosterHistory";
     private static final String DICTIONARY_TABLE_NAME = "People";
     private static final String DICTIONARY_TABLE_CREATE =
             "CREATE TABLE " + DICTIONARY_TABLE_NAME + " (" +
                     "Timestamp" + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-                    "Person" + " TEXT);";
+                    "Person" + " TEXT, " +
+                    "EventTime" + " DATATIME," +
+                    "EventHost" + " TEXT);";
 
     HistoryDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -23,7 +25,8 @@ public class HistoryDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int x, int y) {
-        // Do nothing yet
+        db.execSQL("DROP TABLE " + DICTIONARY_TABLE_NAME + ";");
+        db.execSQL(DICTIONARY_TABLE_CREATE);
     }
 
     @Override
