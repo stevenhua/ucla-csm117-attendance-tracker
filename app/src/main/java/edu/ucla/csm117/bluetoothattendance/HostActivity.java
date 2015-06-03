@@ -33,6 +33,8 @@ public class HostActivity extends ActionBarActivity{
     Handler message_handler;
     HistoryDatabase registrations;
     SQLiteDatabase db;
+    ArrayList<String> used_devices=new ArrayList<String>();
+    Boolean hosting_screen=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,15 +57,20 @@ public class HostActivity extends ActionBarActivity{
                 switch(msg.what){
                     case 1:
                         String data=msg.obj.toString();
-                        listItems.add(data);
-                        adapter.notifyDataSetChanged();
-                        // add items to databse
-                        ContentValues values = new ContentValues();
-                        values.put("Person",data);
-                        values.put("EventHost", hostname_widget.getText().toString());
-                        values.put("EventTime", eventDate);
-                        db.insert("People", null, values);
-                        //  break
+                        int start_index=data.indexOf("Address: ");
+                        String data_address=data.substring(start_index);
+                        //if(!used_devices.contains(data_address)) {
+                            used_devices.add(data_address);
+                            listItems.add(data);
+                            adapter.notifyDataSetChanged();
+                            // add items to databse
+                            ContentValues values = new ContentValues();
+                            values.put("Person", data);
+                            values.put("EventHost", hostname_widget.getText().toString());
+                            values.put("EventTime", eventDate);
+                            db.insert("People", null, values);
+                            //  break
+                      //  }
                 }
                 super.handleMessage(msg);
             }
@@ -96,9 +103,32 @@ public class HostActivity extends ActionBarActivity{
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed(){
+        if(hosting_screen==true){
+            AlertDialog.Builder builder=new AlertDialog.Builder(this);
+            builder.setTitle("Really Exit?");
+            builder.setMessage("Exiting will end the hosting period");
+            builder.setPositiveButton(android.R.string.no,null);
+            builder.setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    hosting_screen=false;
+                    HostActivity.super.onBackPressed();
+                }
+            });
+            builder.show();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
+
+
     public void onStartHosting(View view) {
 
-        final String hostName = ((EditText)(findViewById(R.id.hostname))).getText().toString();
+        String hostName = ((EditText)(findViewById(R.id.hostname))).getText().toString();
+        hosting_screen=true;
 
         if(!hostName.equals("") && btManager.ready() && btManager.setName(hostName) && btManager.server()) {
             // we are hosting successfully
@@ -122,15 +152,15 @@ public class HostActivity extends ActionBarActivity{
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            }
-                        });
+                        }
+                    });
             alertDialog.show();
-            btManager.keep_running=false;
+            //btManager.keep_running=false;
 
         } else {
             // failed to host
             // throw up an error message
-
+            hosting_screen=false;
             if (hostName.equals("")) {
                 AlertDialog alertDialog = new AlertDialog.Builder(this).create();
                 alertDialog.setTitle("Error");

@@ -45,15 +45,15 @@ public class BluetoothManager {
     String name;
     String studentid;
     Handler hostHandler;
-    boolean keep_running=true;
+    //boolean keep_running=true;
     //  boolean valid_socket=false;
     final int REQUEST_ENABLE_BT = 1;
-
 
 
     private class AcceptThread extends Thread{
         private BluetoothServerSocket mmServerSocket;
         private InputStream mmInStream;
+        private BluetoothSocket mmSocket;
         private final UUID connect_uuid;
         public AcceptThread(UUID uuid) {
             connect_uuid=uuid;
@@ -61,58 +61,69 @@ public class BluetoothManager {
 
         public void run() {
             while (true) {
-                BluetoothServerSocket tmp = null;
-                try {
-                    // connect_uuid is one of 7 uuids used by app, also used by the client code
-                    tmp = adapter.listenUsingRfcommWithServiceRecord(NAME,connect_uuid);
-                } catch (IOException e) {
-                }
-                mmServerSocket = tmp;
-                BluetoothSocket socket = null;
-                // Keep listening until exception occurs or a socket is returned
-                while (true) {
+                if (my_host_activity.hosting_screen) {
+                    BluetoothServerSocket tmp = null;
                     try {
-                        socket = mmServerSocket.accept();
+                        // connect_uuid is one of 7 uuids used by app, also used by the client code
+                        tmp = adapter.listenUsingRfcommWithServiceRecord(NAME, connect_uuid);
                     } catch (Exception e) {
                         break;
                     }
-                    // If a connection was accepted
-                    if (socket != null) {
-                        // Do work to manage the connection (in a separate thread)
-
-                        InputStream tmpIn = null;
+                    mmServerSocket = tmp;
+                    mmSocket = null;
+                    // Keep listening until exception occurs or a socket is returned
+                    while (my_host_activity.hosting_screen) {
                         try {
-                            tmpIn = socket.getInputStream();
-                        } catch (IOException e) {
-                            cancel();
+                            mmSocket = mmServerSocket.accept();
+                        } catch (Exception e) {
                             break;
                         }
-                        mmInStream = tmpIn;
+                        // If a connection was accepted
+                        if (mmSocket != null) {
+                            // Do work to manage the connection (in a separate thread)
 
-                        String tmp_name = readStream();
-
-
-                        if (tmp_name != null) {
-                            Message msg = Message.obtain();
-                            msg.obj = tmp_name;
-                            msg.what = 1;
-                            // myHandler.sendMessage(msg);
-                            msg.setTarget(hostHandler);
-                            msg.sendToTarget();
+                            InputStream tmpIn = null;
                             try {
-                                mmInStream.close();
-                            }catch(Exception e){
-
+                                tmpIn = mmSocket.getInputStream();
+                            } catch (IOException e) {
+                                cancel();
+                                break;
                             }
-                        }
+                            mmInStream = tmpIn;
 
-                        try {
-                            mmServerSocket.close();
-                        } catch (IOException e) {
+                            String tmp_name = readStream();
+
+
+                            if (tmp_name != null) {
+                                Message msg = Message.obtain();
+                                msg.obj = tmp_name;
+                                msg.what = 1;
+                                // myHandler.sendMessage(msg);
+                                msg.setTarget(hostHandler);
+                                msg.sendToTarget();
+                                try {
+                                    mmInStream.close();
+                                } catch (Exception e) {
+
+                                }
+                            }
+
+                            try {
+                                mmServerSocket.close();
+                            } catch (IOException e) {
+                                break;
+                            }
                             break;
                         }
                         break;
                     }
+                    try {
+                        mmSocket.close();
+                    } catch (Exception e) {
+
+                    }
+                }else{
+                    cancel();
                     break;
                 }
             }
@@ -123,7 +134,17 @@ public class BluetoothManager {
         public void cancel() {
             try {
                 mmServerSocket.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
+            }
+
+            try{
+                mmSocket.close();
+            }catch (Exception e){
+            }
+
+            try{
+                mmInStream.close();
+            }catch (Exception e){
             }
         }
 
